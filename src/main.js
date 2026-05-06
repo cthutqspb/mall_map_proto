@@ -1,77 +1,83 @@
 import * as THREE from 'three';
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 import { createRenderer } from './renderer';
 import { createScene, createGrid } from './scene';
-import { createPerspectiveCamera, createOrthographicCamera } from './camera';
+import { switchCamera, activeCamera } from './camera';
 import { generateShops } from './shops';
-import './style.css'
+import { shelfPacking } from './layout/shelfPacking';
+import './style.css';
+import { int } from 'three/tsl';
 
 const GRID_SIZE = 100;
 const GRID_DIVISIONS = 10;
 
 
-const perspectiveCamera = createPerspectiveCamera()
-const orthoCamera = createOrthographicCamera()
-
-let activeCamera = orthoCamera;
 
 const scene = createScene();
 const grid = createGrid(GRID_SIZE, GRID_DIVISIONS);
 const renderer = createRenderer();
+const ambientLight = new THREE.AmbientLight(0xfffff, 1);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 
+scene.add(ambientLight);
+scene.add(directionalLight);
 scene.add(grid);
 
 const shops = [];
 
 generateShops().forEach((shop) => {
-    console.log('SHOP', shop)
     const {width, depth, height, color} = shop;
-    const shopGeom = new THREE.BoxGeometry(width, depth, height);
-    const shopMaterial = new THREE.MeshBasicMaterial({color: color});
+    const shopGeom = new THREE.BoxGeometry(width, height, depth);
+    const shopMaterial = new THREE.MeshStandardMaterial({
+        color: color,
+        //wireframe: true,
+        transparent: true,
+        opacity: .72        
+    });
     const shopMesh = new THREE.Mesh(shopGeom, shopMaterial);
     shopMesh.customProps = {width: width, depth: depth, height: height};
     shops.push(shopMesh);
     scene.add(shopMesh);
 })
-//console.log('shops', shops)
-const packShops = (items, containerWidth, spacing = 1) => {
-    let x = 0; //начальная позиция магазина по x
-    let z = 0; //начальная позиция магазина по y
-    let currentRowMaxDepth = 0; //высота строки
 
-    items.sort((a,b) => b.customProps.depth - a.customProps.depth); //сортируем магазины по глубине(длине)
-
-    items.forEach(item => {
-        console.log('item', item)
-        if (x + item.customProps.width + spacing > containerWidth) { //если позиция по Х больше чем ширина размерность сетки (x) то перенос на следующий ряд
-            x = 0; //переносим
-            z += currentRowMaxDepth; //запоминаю координату нового ряда, немного странно после того как неделю ковырялся над 2d в defold 
-            currentRowMaxDepth = 0; //начинаем новый ряд
-        }
-        
-        item.position.x = x + item.customProps.width / 2; // делим на два потому что объект все таки не точка 
-        item.position.z = z + item.customProps.depth / 2;  //та же фигня
-        item.position.y = item.customProps.height / 2;  //та же, но щас чет все равно утонили вниз
-        console.log(item.position.y)
-        x += item.customProps.width + spacing;// если не переносим то координата следующего магаза
-        currentRowMaxDepth = Math.max(currentRowMaxDepth, item.customProps.depth); 
-    })
-}
-
-packShops(shops, 100);
+shelfPacking(shops, 100);
 
 window.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case '1':
-            activeCamera = perspectiveCamera;
-            break;
-        case '2':
-            activeCamera = orthoCamera;
-            break;
-    }
+    switchCamera(event);
+});
+
+
+let prevIntersectedObject = null;
+
+window.addEventListener('pointermove', (event) =>{
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    const intersects = raycaster.intersectObjects(scene.children);
+
+    if (!prevIntersectedObject && intersects[0]) {
+        renderer.domElement.style.cursor = 'pointer';
+        intersects[0].object.material.opacity = 1;
+        prevIntersectedObject = intersects[0]
+    } else if (intersects.length == 0) {
+        renderer.domElement.style.cursor = 'default';
+        if (prevIntersectedObject) {
+            prevIntersectedObject.object.material.opacity = 0.72;
+            prevIntersectedObject = null;
+        }
+    } else if (prevIntersectedObject && prevIntersectedObject !== intersects[0]) { 
+        prevIntersectedObject.object.material.opacity = 0.72;
+        intersects[0].object.material.opacity = 1;
+        prevIntersectedObject = intersects[0];
+    } 
+    
 });
 
 function animate() {
     requestAnimationFrame(animate);
+    raycaster.setFromCamera(mouse, activeCamera);
+            
     renderer.render(scene, activeCamera);
 }
-animate()
+animate();
