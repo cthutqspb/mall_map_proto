@@ -6,3 +6,7 @@ export const createScene = () => {
     return scene;
 }
  
+export const createGrid = (size, divisions) => {
+    const grid = new THREE.GridHelper(size, divisions);
+    return grid;
+}
