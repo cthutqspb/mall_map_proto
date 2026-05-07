@@ -1,7 +1,8 @@
 .shop-label {
     white-space: nowrap;
     text-align: center;
-        font-size: 12px;
+    font-size: 12px;
+    margin: 0 auto;
     color: rgba(202, 255, 202);
     white-space: nowrap;
     overflow: hidden;
@@ -15,16 +16,30 @@
 }
 .shop-label.vertical {
     writing-mode: vertical-rl;
-    text-orientation: mixed;  /* или upright, чтобы буквы не лежали на боку */
-    white-space: normal;       /* разрешаем перенос (для длинных слов) */
-    max-height: 80px;          /* ограничиваем высоту */
+    text-orientation: mixed;
+    white-space: normal;   
+    max-height: 80px;
 }
-.shop-label.selected::after {
-    color: rgba(255, 255,127);
-    position: absolute;
-    font-size: 18px;
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    content: '▼';
+
+.camera-buttons {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 12px;
+  background: rgba(0,0,0,0.6);
+  padding: 8px;
+  border-radius: 40px;
+  backdrop-filter: blur(8px);
+}
+button {
+  background: #2a2a2a;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 32px;
+  cursor: pointer;
+}
+button.active {
+  background: #4f46e5;
 }

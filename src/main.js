@@ -37,7 +37,15 @@ shelfPacking(shops, 100);
 //слушаем
 window.addEventListener('keydown', (event) => {
     switchCamera(event);
-    updateLabelsForCamera(shops, activeCamera === orthographicCamera);
+    const orthoMode = activeCamera === orthographicCamera;
+    updateLabelsForCamera(shops, orthoMode);
+    if (orthoMode) {
+        btn2d.classList.add('active');
+        btn3d.classList.remove('active');
+    } else {
+        btn3d.classList.add('active');
+        btn2d.classList.remove('active');
+    }
 });
 
 window.addEventListener('pointermove', (event) => {
@@ -46,6 +54,25 @@ window.addEventListener('pointermove', (event) => {
 
 window.addEventListener('click', (event) => {
     handleClick(event, activeCamera, shops);
+})
+
+const btn2d = document.getElementById('btn-2d');
+const btn3d = document.getElementById('btn-3d');
+
+btn2d.addEventListener('click', () => {
+    switchCamera({ key: '2' });    
+    const orthoMode = activeCamera === orthographicCamera;
+    updateLabelsForCamera(shops, orthoMode);
+    btn2d.classList.add('active');
+    btn3d.classList.remove('active');
+})
+
+btn3d.addEventListener('click', () => {
+    switchCamera({ key: '1' });    
+    const orthoMode = activeCamera === orthographicCamera;
+    updateLabelsForCamera(shops, orthoMode);
+    btn3d.classList.add('active');
+    btn2d.classList.remove('active');
 })
 
 const onWindowResize = () => {
@@ -57,11 +84,13 @@ const onWindowResize = () => {
     perspectiveCamera.updateProjectionMatrix();
     
     //для орто 
+    const halfWorldSize = ORTHOGRAPHIC_CAMERA_SIZE / 2;
     const aspect = width / height;
-    orthographicCamera.left = -ORTHOGRAPHIC_CAMERA_SIZE * aspect;
-    orthographicCamera.right = ORTHOGRAPHIC_CAMERA_SIZE * aspect;
-    orthographicCamera.top = ORTHOGRAPHIC_CAMERA_SIZE;
-    orthographicCamera.bottom = -ORTHOGRAPHIC_CAMERA_SIZE;
+
+    orthographicCamera.left = -halfWorldSize * aspect;
+    orthographicCamera.right = halfWorldSize * aspect;
+    orthographicCamera.top = halfWorldSize;
+    orthographicCamera.bottom = -halfWorldSize;
     orthographicCamera.updateProjectionMatrix();
     
     renderer.setSize(width, height);

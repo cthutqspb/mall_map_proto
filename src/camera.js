@@ -26,7 +26,7 @@ const createOrthographicCamera = () => {
 const perspectiveCamera = createPerspectiveCamera();
 const orthographicCamera = createOrthographicCamera();
 
-export let activeCamera = orthographicCamera;
+let activeCamera = orthographicCamera;
 
 export const switchCamera = (event) => {
     switch (event.key) {
@@ -39,4 +39,4 @@ export const switchCamera = (event) => {
     }
 }
 
-export { perspectiveCamera, orthographicCamera };
+export { activeCamera, perspectiveCamera, orthographicCamera };
