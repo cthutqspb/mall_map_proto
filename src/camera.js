@@ -1,20 +1,22 @@
 import * as THREE from 'three';
 
 const aspect = window.innerWidth / window.innerHeight;
-const size = 100;
+const SIZE = 50;
+
+export const transitionCamera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
 
 const createPerspectiveCamera = () => {
-    const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-    camera.position.set(30, 30, 30);
+    const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
+    camera.position.set(25, 50, 50);
     camera.lookAt(0, 0, 0);
     return camera;
 }
 
 const createOrthographicCamera = () => {
     const camera = new THREE.OrthographicCamera(
-        -size * aspect, size * aspect,  // left, right
-        size, -size,                    // top, bottom
-        0.1, 1000                       // near, far
+        -SIZE * aspect, SIZE * aspect,  // справа слева
+        SIZE, -SIZE,                    // сверх снизу
+        0.1, 1000                       // близко далеко
     )
     camera.position.set(0, 10, 0);
     camera.lookAt(0, 0, 0);
@@ -37,4 +39,4 @@ export const switchCamera = (event) => {
     }
 }
 
-
+export { perspectiveCamera, orthographicCamera };
